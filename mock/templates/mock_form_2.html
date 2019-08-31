@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% block title_block %}
+  {% load staticfiles %}
+  <title>New Form</title>
+  <script src="{% static 'js/form.js' %}"></script>
+{% endblock %}
+{% block body_block %}
+  <br>
+  <div class="container">
+    <h3>Create a new mock</h3>
+    <hr>
+    <form id="form-0" method="post">
+      {% csrf_token %}
+      <div class="form-group row">
+        <label class="col-2 col-form-label" for="{{ form.title.name }}">{{ form.title.label }}</label>
+        <div class="col-10">
+          {{ form.title }}
+          <small id="title_help" class="form-text text-muted">
+            The name of the mock. It has no functional purpose. Max 128 characters and it has to be unique.
+          </small>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-2 col-form-label" for="{{ form.status.name }}">{{ form.status.label }}</label>
+        <div class="col-10">
+          {{ form.status }}
+          <small id="status_help" class="form-text text-muted">
+            The status code and reason of the response.
+          </small>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="{{ form.response_body.name }}">{{ form.response_body.label }}</label>
+        <div>
+          {{ form.response_body }}<small id="body_help" class="form-text text-muted">
+          The body of the response. Max 4096 characters.
+          This field supports some special formatting:
+          <ul>
+            <li><% seq %> is replaced with the current call number</li>
+            <li><% rand %> is replaced with a random integer</li>
+            <li><% header_name %> is replaced with the value of the request header with that name or 'undefined' if it
+              doesn't exist
+            </li>
+          </ul>
+          These templates also work in the header values fields.
+        </small>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-2 col-form-label" for="{{ form.is_active.name }}">{{ form.is_active.label }}</label>
+        <div class="col-10 form-inline">
+          {{ form.is_active }}
+          <small id="active_help" class="text-muted ml-2">
+            Uncheck to create a disabled mock. Can be changed later.
+          </small>
+        </div>
+      </div>
+      <button id="toggle_button" type="button" class="btn btn-warning" onclick="toggle_headers()"
+              aria-describedby="edit_header_help">
+        Edit Standard Headers <i class="fa fa-edit"></i>
+      </button>
+      <small id="edit_header_help" class="text-muted ml-2">Edit the values of the standard headers.</small>
+      <br><br>
+      <div id="default_headers" hidden>
+        <h5 class="text-info">The placeholders are purely examples. They are not the default values.</h5><br>
+        <div class="form-group row">
+          <label for="shv1" class="col-3 col-form-label">Accept-Patch</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv1"
+                   placeholder="text/example;charset=utf-8" aria-describedby="shv1_help">
+            <small id="shv1_help" class="form-text text-muted">Specifies which patch document formats this server
+              supports.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv2" class="col-3 col-form-label">Accept-Ranges</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv2" placeholder="bytes"
+                   aria-describedby="shv2_help">
+            <small id="shv2_help" class="form-text text-muted">What partial content range types this server supports via
+              byte serving.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv3" class="col-3 col-form-label">Age</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv3" placeholder="12"
+                   aria-describedby="shv3_help">
+            <small id="shv3_help" class="form-text text-muted">The age the object has been in a proxy cache in
+              seconds.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv4" class="col-3 col-form-label">Allow</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv4" placeholder="GET, HEAD"
+                   aria-describedby="shv4_help">
+            <small id="shv4_help" class="form-text text-muted">Valid methods for a specified resource. To be used for a
+              405 Method not allowed.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv5" class="col-3 col-form-label">Alt-Svc</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv5"
+                   placeholder='http/1.1= "http2.example.com:8001"; ma=7200' aria-describedby="shv5_help">
+            <small id="shv5_help" class="form-text text-muted">A server uses “Alt-Svc” header (meaning Alternative
+              Services) to indicate that its resources can also be accessed at a different network location (host or
+              port) or using a different protocol. When using HTTP/2, servers should instead send an ALTSVC
+              frame.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv6" class="col-3 col-form-label">Cache-Control</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv6"
+                   placeholder="max-age=3600 / no-cache, no-store, max-age=0, must-revalidate"
+                   aria-describedby="shv6_help">
+            <small id="shv6_help" class="form-text text-muted">If no-cache is used, the Cache-Control header can tell
+              the browser to never use a cached version of a resource without first checking the ETag value. max-age is
+              measured in seconds. The more restrictive no-store option tells the browser (and all the intermediary
+              network devices) the not even store the resource in its cache.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv7" class="col-3 col-form-label">Connection</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv7" placeholder="close"
+                   aria-describedby="shv7_help">
+            <small id="shv7_help" class="form-text text-muted">Control options for the current connection and list of
+              hop-by-hop response fields. Deprecated in HTTP/2.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv8" class="col-3 col-form-label">Content-Disposition</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv8"
+                   placeholder='attachment; filename="file.txt"' aria-describedby="shv8_help">
+            <small id="shv8_help" class="form-text text-muted">An opportunity to raise a “File Download” dialogue box
+              for a known MIME type with binary format or suggest a filename for dynamic content. Quotes are necessary
+              with special characters.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv9" class="col-3 col-form-label">Content-Encoding</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv9" placeholder="gzip"
+                   aria-describedby="shv9_help">
+            <small id="shv9_help" class="form-text text-muted">The type of encoding used on the data. See HTTP
+              compression.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv10" class="col-3 col-form-label">Content-Language</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv10" placeholder="en"
+                   aria-describedby="shv10_help">
+            <small id="shv10_help" class="form-text text-muted">The natural language or languages of the intended
+              audience for the enclosed content.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv11" class="col-3 col-form-label">Content-Length</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv11" placeholder="348"
+                   aria-describedby="shv11_help">
+            <small id="shv11_help" class="form-text text-muted">The length of the response body expressed in 8-bit
+              bytes.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv12" class="col-3 col-form-label">Content-Location</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv12" placeholder="/index.htm"
+                   aria-describedby="shv12_help">
+            <small id="shv12_help" class="form-text text-muted">An alternate location for the returned data.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv13" class="col-3 col-form-label">Content-Range</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv13"
+                   placeholder="bytes 21010-47021/47022" aria-describedby="shv13_help">
+            <small id="shv13_help" class="form-text text-muted">Where in a full body message this partial message
+              belongs.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv14" class="col-3 col-form-label">Content-Type</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv14"
+                   placeholder="text/html; charset=utf-8" aria-describedby="shv14_help">
+            <small id="shv14_help" class="form-text text-muted">The MIME type of this content.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv15" class="col-3 col-form-label">Date</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv15"
+                   placeholder="Tue, 15 Nov 1994 08:12:31 GMT" aria-describedby="shv15_help">
+            <small id="shv15_help" class="form-text text-muted">The date and time that the message was sent (in
+              “HTTP-date” format as defined by RFC 7231).</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv16" class="col-3 col-form-label">Delta-Base</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv16" placeholder='"abc"'
+                   aria-describedby="shv16_help">
+            <small id="shv16_help" class="form-text text-muted">Specifies the delta-encoding entity tag of the
+              response.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv17" class="col-3 col-form-label">ETag</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv17"
+                   placeholder='"737060cd8c284d8a[...]"' aria-describedby="shv17_help">
+            <small id="shv17_help" class="form-text text-muted">An identifier for a specific version of a resource,
+              often a message digest.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv18" class="col-3 col-form-label">Expires</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv18"
+                   placeholder="Sat, 01 Dec 2018 16:00:00 GMT" aria-describedby="shv18_help">
+            <small id="shv18_help" class="form-text text-muted">Gives the date/time after which the response is
+              considered stale (in “HTTP-date” format as defined by RFC 7231).</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv19" class="col-3 col-form-label">IM</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv19" placeholder="feed"
+                   aria-describedby="shv19_help">
+            <small id="shv19_help" class="form-text text-muted">Instance-manipulations applied to the response.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv20" class="col-3 col-form-label">Last-Modified</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv20"
+                   placeholder="Mon, 15 Nov 2017 12:00:00 GMT" aria-describedby="shv20_help">
+            <small id="shv20_help" class="form-text text-muted">The last modified date for the requested object (in
+              “HTTP-date” format as defined by RFC 7231).</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv21" class="col-3 col-form-label">Link</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv21"
+                   placeholder='</feed>; rel="alternate"' aria-describedby="shv21_help">
+            <small id="shv21_help" class="form-text text-muted">Used to express a typed relationship with another
+              resource, where the relation type is defined by RFC 5988.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv22" class="col-3 col-form-label">Location</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv22" placeholder="/pub/WWW/People.html"
+                   aria-describedby="shv22_help">
+            <small id="shv22_help" class="form-text text-muted">Used in redirection, or when a new resource has been
+              created.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv23" class="col-3 col-form-label">Pragma</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv23" placeholder="no-cache"
+                   aria-describedby="shv23_help">
+            <small id="shv23_help" class="form-text text-muted">Implementation-specific fields that may have various
+              effects anywhere along the request-response chain..</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv24" class="col-3 col-form-label">Proxy-Authenticate</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv24" placeholder="Basic"
+                   aria-describedby="shv24_help">
+            <small id="shv24_help" class="form-text text-muted">Request authentication to access the proxy.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv25" class="col-3 col-form-label">Public-Key-Pins</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv25" aria-describedby="shv25_help">
+            <small id="shv25_help" class="form-text text-muted">HTTP Public Key Pinning, announces hash of website’s
+              authentic TLS certificate.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv26" class="col-3 col-form-label">Retry-After</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv26"
+                   placeholder="120 / Fri, 07 Nov 2014 23:59:59 GMT" aria-describedby="shv26_help">
+            <small id="shv26_help" class="form-text text-muted">If an entity is temporarily unavailable, this instructs
+              the client to try again later. Value could be a specified period of time (in seconds) or a
+              HTTP-date.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv27" class="col-3 col-form-label">Server</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv27" placeholder="Apache/2.4.1 (Unix)"
+                   aria-describedby="shv27_help">
+            <small id="shv27_help" class="form-text text-muted">A name for the server.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv28" class="col-3 col-form-label">Set-Cookie</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv28"
+                   placeholder="UserID=JohnDoe; Max-Age=3600; Version=1" aria-describedby="shv28_help">
+            <small id="shv28_help" class="form-text text-muted">An HTTP cookie.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv29" class="col-3 col-form-label">Strict-Transport-Security</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv29"
+                   placeholder="max-age=16070400; includeSubDomains" aria-describedby="shv29_help">
+            <small id="shv29_help" class="form-text text-muted">A HSTS Policy informing the HTTP client how long to
+              cache the HTTPS only policy and whether this applies to subdomains.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv30" class="col-3 col-form-label">Trailer</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv30" placeholder="Max-Forwards"
+                   aria-describedby="shv30_help">
+            <small id="shv30_help" class="form-text text-muted">The Trailer general field value indicates that the given
+              set of header fields is present in the trailer of a message encoded with chunked transfer coding.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv31" class="col-3 col-form-label">Transfer-Encoding</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv31" placeholder="chunked"
+                   aria-describedby="shv31_help">
+            <small id="shv31_help" class="form-text text-muted">The form of encoding used to safely transfer the entity
+              to the user. Currently defined methods are: chunked, compress, deflate, gzip, identity. Deprecated in
+              HTTP/2.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv32" class="col-3 col-form-label">Tk</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv32" placeholder="?"
+                   aria-describedby="shv32_help">
+            <small id="shv32_help" class="form-text text-muted">Tracking Status header, value suggested to be sent in
+              response to a DNT(do-not-track), possible values: “!” — under construction “?” — dynamic “G” — gateway to
+              multiple parties “N” — not tracking “T” — tracking “C” — tracking with consent “P” — tracking only if
+              consented “D” — disregarding DNT “U” — updated.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv33" class="col-3 col-form-label">Upgrade</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv33"
+                   placeholder="h2c, HTTPS/1.3, IRC/6.9, RTA/x11, websocket" aria-describedby="shv33_help">
+            <small id="shv33_help" class="form-text text-muted">Ask the client to upgrade to another protocol.
+              Deprecated in HTTP/2.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv34" class="col-3 col-form-label">Vary</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv34" placeholder="Accept-Language / *"
+                   aria-describedby="shv34_help">
+            <small id="shv34_help" class="form-text text-muted">Tells downstream proxies how to match future request
+              headers to decide whether the cached response can be used rather than requesting a fresh one from the
+              origin server.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv35" class="col-3 col-form-label">Via</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv35"
+                   placeholder="1.0 fred, 1.1 example.com (Apache/1.1)" aria-describedby="shv35_help">
+            <small id="shv35_help" class="form-text text-muted">Informs the client of proxies through which the response
+              was sent.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv36" class="col-3 col-form-label">Warning</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv36"
+                   placeholder="199 Miscellaneous warning" aria-describedby="shv36_help">
+            <small id="shv36_help" class="form-text text-muted">A general warning about possible problems with the
+              entity body.</small>
+          </div>
+        </div>
+        <br>
+        <div class="form-group row">
+          <label for="shv37" class="col-3 col-form-label">WWW-Authenticate</label>
+          <div class="col-9">
+            <input type="text" name="standard_value" class="form-control" id="shv37" placeholder="Basic"
+                   aria-describedby="shv37_help">
+            <small id="shv37_help" class="form-text text-muted">Indicates the authentication scheme that should be used
+              to access the requested entity.</small>
+          </div>
+        </div>
+        <br>
+      </div>
+      <br><br>
+      <h4>Custom Headers</h4>
+      <div id="headers" class="container"></div>
+      <br>
+      <button type="button" class="btn btn-success" onclick="new_header()" aria-describedby="new_header_help">
+        New Custom Header <i class="fa fa-plus"></i>
+      </button>
+      <small id="new_header_help" class="text-muted ml-2">Add a new custom header for the response.</small>
+      <br><br>
+      <div align="right">
+        <button type="submit" class="btn btn-primary">Done</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

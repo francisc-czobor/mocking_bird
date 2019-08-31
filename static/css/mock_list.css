@@ -1,0 +1,15 @@
+.link {
+    display: block;
+    padding: .75rem;
+    text-decoration: none !important;
+    color: black;
+}
+
+.link:hover {
+    background: lightgrey;
+    color: black;
+}
+
+.link-cell {
+    padding: 0 !important;
+}

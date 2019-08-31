@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title_block %}
+  {% load staticfiles %}
+  {% load index %}
+  <title>New Mock</title>
+  <script src="{% static 'js/form.js' %}"></script>
+{% endblock %}
+{% block body_block %}
+  <br>
+  <div class="container mb-5">
+    <h3>Create a new mock</h3>
+    <hr>
+    <form id="form-0" method="post">
+      {% csrf_token %}
+      <div class="form-group row">
+        <label class="col-2 col-form-label" for="{{ form.title.name }}">{{ form.title.label }}</label>
+        <div class="col-10">
+          {{ form.title }}
+          <small id="title_help" class="form-text text-muted">
+            The name of the mock. It has no functional purpose. Max 128 characters and it has to be unique.
+          </small>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-2 col-form-label" for="{{ form.status.name }}">{{ form.status.label }}</label>
+        <div class="col-10">
+          {{ form.status }}
+          <small id="status_help" class="form-text text-muted">
+            The status code and reason of the response.
+          </small>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="{{ form.response_body.name }}">{{ form.response_body.label }}</label>
+        <div>
+          {{ form.response_body }}<small id="body_help" class="form-text text-muted">
+          The body of the response. Max 4096 characters.
+          This field supports some special formatting:
+          <ul>
+            <li><% seq %> is replaced with the current call number</li>
+            <li><% rand %> is replaced with a random integer</li>
+            <li><% header_name %> is replaced with the value of the request header with that name or 'undefined' if it
+              doesn't exist
+            </li>
+          </ul>
+          These templates also work in the header values fields.
+        </small>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-2 col-form-label" for="{{ form.is_active.name }}">{{ form.is_active.label }}</label>
+        <div class="col-10 form-inline">
+          {{ form.is_active }}
+          <small id="active_help" class="text-muted ml-2">
+            Uncheck to create a disabled mock. Can be changed later.
+          </small>
+        </div>
+      </div>
+      <button id="toggle_button" type="button" class="btn btn-warning" onclick="toggle_headers()"
+              aria-describedby="edit_header_help">
+        Edit Standard Headers <i class="fa fa-edit"></i>
+      </button>
+      <small id="edit_header_help" class="text-muted ml-2">Edit the values of the standard headers.</small>
+      <br><br>
+      <div id="default_headers" hidden>
+        <h5 class="text-info">The placeholders are purely examples. They are not the default values.</h5><br>
+        {% for tag in tags %}
+          <div class="form-group row">
+            <label for="shv{{ forloop.counter }}" class="col-3 col-form-label">{{ tag }}</label>
+            <div class="col-9">
+              <input type="text" name="standard_value" class="form-control" id="shv{{ forloop.counter }}"
+                     placeholder="{{ placeholders|index:forloop.counter0 }}"
+                     aria-describedby="shv{{ forloop.counter }}_help">
+              <small id="shv{{ forloop.counter }}_help"
+                     class="form-text text-muted">{{ descriptions|index:forloop.counter0 }}</small>
+            </div>
+          </div>
+          <br>
+        {% endfor %}
+        <br>
+      </div>
+      <h4>Custom Headers</h4>
+      <div id="headers" class="container"></div>
+      <br>
+      <button type="button" class="btn btn-success" onclick="new_header()" aria-describedby="new_header_help">
+        New Custom Header <i class="fa fa-plus"></i>
+      </button>
+      <small id="new_header_help" class="text-muted ml-2">Add a new custom header for the response.</small>
+      {% if users|length > 0 %}
+        <br><br>
+        <button id="toggle_users_button" type="button" class="btn btn-warning" onclick="toggle_users()"
+                aria-describedby="edit_users_help">
+          Edit User Permissions <i class="fa fa-edit"></i>
+        </button>
+        <small id="edit_users_help" class="text-muted ml-2">Edit the user permissions.</small>
+        <br><br>
+        <div id="user_permissions" hidden>
+          <h5 class="text-info">Check the users that you want to be able to view and edit this mock.</h5>
+          {% for user in users %}
+            <div class="row">
+              <label class="col-2 col-form-label" for="usr{{ forloop.counter }}">{{ user.username }}</label>
+              <div class="col-10">
+                <input type="checkbox" id="usr{{ forloop.counter }}" name="user_permissions"
+                       value="{{ user.username }}">
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <br><br>
+      <div align="right">
+        <button type="submit" class="btn btn-primary">Done</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title_block %}
+  {% load staticfiles %}
+  <title>History</title>
+  <link rel="stylesheet" href="{% static 'css/mock_list.css' %}">
+{% endblock %}
+{% block body_block %}
+  <br>
+  <div class="container">
+    <h3>Mock Calls</h3>
+    <hr>
+    <p>This is the list of mock calls.</p>
+    <div class="table-responsive">
+      <table class="table table-hover table-striped">
+        <caption>The mock's call history.</caption>
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Method</th>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Info</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for request in requests %}
+            <tr>
+              <th scope="row">{{ forloop.counter }}</th>
+              <td>{{ request.method }}</td>
+              <td>{{ request.timestamp }}</td>
+              <td class="link-cell">
+                <a class="link" href="{% url 'mock:req_info' mock_path=mock_path req_path=request.req_path %}">
+                  <i class="fa fa-info-circle"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title_block %}
+  {% load staticfiles %}
+  <title>Request Info</title>
+  <link rel="stylesheet" href="{% static 'css/mock_list.css' %}">
+{% endblock %}
+{% block body_block %}
+  <br>
+  <div class="container">
+    <h3>Request #{{ req.req_no }} for {{ req.mock.title }}</h3>
+    <small class="text-muted">{{ req.timestamp }}</small>
+    <hr>
+    <p>This is the detailed view of the request.</p>
+    <br>
+    <div class="row mb-1">
+      <div class="col-3">Scheme</div>
+      <div class="col-9">{{ req.scheme }}</div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-3">Method</div>
+      <div class="col-9">{{ req.method }}</div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-3">Host</div>
+      <div class="col-9">{{ req.host }}</div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-3">Port</div>
+      <div class="col-9">{{ req.port }}</div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-3">Path</div>
+      <div class="col-9">{{ req.path }}</div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-3">Body</div>
+      {% if req.body == '' %}
+        <div class="col-9"><small class="text-muted">There was no body for this request.</small></div>
+      {% else %}
+        <div class="col-9">{{ req.body }}</div>
+      {% endif %}
+    </div>
+
+    {% if headers|length > 0 %}
+      <br>
+      <h4>Request Headers</h4>
+      <br>
+      <div class="row mb-2">
+        <div class="col-3"><h5>Header Tags</h5></div>
+        <div class="col-9"><h5>Header Values</h5></div>
+      </div>
+      {% for header in headers %}
+        <div class="row mb-1">
+          <div class="col-3">{{ header.tag }}</div>
+          <div class="col-9">{{ header.value }}</div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if get_parameters|length > 0 %}
+      <br>
+      <h4>GET Parameters</h4>
+      <br>
+      <div class="row mb-2">
+        <div class="col-3"><h5>Parameter Tags</h5></div>
+        <div class="col-9"><h5>Parameter Values</h5></div>
+      </div>
+      {% for parameter in get_parameters %}
+        <div class="row mb-1">
+          <div class="col-3">{{ parameter.tag }}</div>
+          <div class="col-9">
+            {% for value in parameter.values %}
+              '{{ value.value }}'
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if post_parameters|length > 0 %}
+      <br>
+      <h4>POST Parameters</h4>
+      <br>
+      <div class="row mb-2">
+        <div class="col-3"><h5>Parameter Tags</h5></div>
+        <div class="col-9"><h5>Parameter Values</h5></div>
+      </div>
+      {% for parameter in post_parameters %}
+        <div class="row mb-1">
+          <div class="col-3">{{ parameter.tag }}</div>
+          <div class="col-9">
+            {% for value in parameter.values %}
+              '{{ value.value }}'
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if cookies|length > 0 %}
+      <br>
+      <h4>Cookies</h4>
+      <br>
+      <div class="row mb-2">
+        <div class="col-3"><h5>Cookie Tags</h5></div>
+        <div class="col-9"><h5>Cookie Values</h5></div>
+      </div>
+      {% for cookie in cookies %}
+        <div class="row mb-1">
+          <div class="col-3">{{ cookie.tag }}</div>
+          <div class="col-9">{{ cookie.value }}</div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+  </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title_block %}
+  {% load staticfiles %}
+  <title>Mocks</title>
+  <link rel="stylesheet" href="{% static 'css/mock_list.css' %}">
+{% endblock %}
+{% block body_block %}
+  <br>
+  <div class="container">
+    <h3>Mocks</h3>
+    <hr>
+    <p>This is the list of created mocks. Click on a mock's name cell to view it's call history.</p>
+    <div class="table-responsive">
+      <table class="table table-hover table-striped">
+        <caption>The list of mocks.</caption>
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Created By</th>
+            <th scope="col">Status Code</th>
+            <th scope="col">Call No</th>
+            <th scope="col">Link</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mock in mocks %}
+            <tr>
+              <th class="link-cell" scope="row">
+                <a class="link" href="{% url 'mock:mock_history' mock_path=mock.mock_path %}">{{ mock.title }}</a>
+              </th>
+              <td class="link-cell"><a class="link" href="#">{{ mock.user }}</a></td>
+              <td>{{ mock.status }}</td>
+              <td>{{ mock.call_no }}</td>
+              <td class="link-cell"><a class="link" href="{% url 'mock:mock' mock_path=mock.mock_path %}"><i
+                      class="fa fa-external-link-alt"></i></a></td>
+              <td class="link-cell"><a class="link" href="{% url 'mock:mock_edit' mock_path=mock.mock_path %}"><i
+                      class="fa fa-edit"></i></a></td>
+              <td>{{ mock.is_active }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
